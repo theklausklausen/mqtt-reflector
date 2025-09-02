@@ -1,0 +1,124 @@
+---
+include:
+  - project: 'klausklausen/templates'
+    ref: main
+    file: 'test.yml'
+  - project: 'klausklausen/templates'
+    ref: main
+    file: 'deploy.yml'
+  - project: 'klausklausen/templates'
+    ref: main
+    file: 'build.yml'
+  - project: 'klausklausen/templates'
+    ref: main
+    file: 'package.yml'
+  - project: 'klausklausen/templates'
+    ref: main
+    file: 'security.yml'
+  - project: 'klausklausen/templates'
+    ref: main
+    file: 'lint.yml'
+
+variables:
+  TAG: $CI_COMMIT_BRANCH
+
+stages:
+  - security
+  - lint
+  - test
+  - build
+  - package
+  - deploy
+
+.build_file_changes: &build_file_changes
+  changes:
+    - '**/Dockerfile'
+    - '**/*.py'
+    - '**/requirements.txt'
+
+.build_only: &build_only
+  only:
+    <<: *build_file_changes
+
+.manifest_update: &manifest_update
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      <<: *build_file_changes
+
+.only_on_helm_change: &only_on_helm_change
+  only:
+    changes:
+      - '**/helm/**/*'
+
+.only_on_markdown_change: &only_on_markdown_change
+  only:
+    changes:
+      - '**/*.md'
+
+.only_on_yaml_change: &only_on_yaml_change
+  only:
+    changes:
+      - '**/*.yml'
+      - '**/*.yaml'
+
+# security
+secret_scan:
+  extends: .secret_scan
+package_scan:
+  extends: .package_scan
+
+# lint
+markdown lint:
+  extends: .markdown_lint
+  <<: *only_on_markdown_change
+yaml lint:
+  extends: .yaml_lint
+  <<: *only_on_yaml_change
+prettier lint:
+  extends: .prettier
+helm lint:
+  extends: .helm_lint
+  variables:
+    HELM_CHART_DIR: helm/mqtt-reflector/
+  <<: *only_on_helm_change
+
+# tests
+unit_tests:
+  stage: test
+  image: python:3.9
+  before_script:
+    - pip install pytest
+  script:
+    - pytest tests/
+  allow_failure: true
+render helm chart:
+  extends: .render_helm_chart
+  variables:
+    HELM_CHART_DIR: helm/mqtt-reflector/
+  <<: *only_on_helm_change
+
+# mqtt-reflector
+build test:
+  extends: .build_test
+  variables:
+    IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
+    IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
+    BUILD_TARGET: production
+    CONTEXT: ${CI_PROJECT_DIR}/
+    DOCKERFILE: ${CI_PROJECT_DIR}/docker/Dockerfile
+  <<: *build_only
+build:
+  extends: .image_multi_arch
+  variables:
+    IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
+    IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
+    BUILD_TARGET: production
+    CONTEXT: ${CI_PROJECT_DIR}/src/mqtt-reflector
+  <<: *build_only
+package:
+  extends: .image_tag
+  variables:
+    IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
+  tags:
+    - amd64
+  <<: *build_only

@@ -1,0 +1,26 @@
+topics:
+- in: 
+    topic: topic/a
+    variables:
+      - name: type
+        path: car.type
+      - name: created_at
+        path: car.type.created_at
+  out: 
+    topic: topic/b
+    template: | 
+      {
+        "type": "{{ type }}",
+        "created_at": "{{ created_at }}"
+      }
+- in: 
+    topic: topic/c
+    variables:
+      - name: type
+        path: type
+  out: 
+    topic: topic/d
+    template: | 
+      {
+        "type": "{{ type }}"
+      }

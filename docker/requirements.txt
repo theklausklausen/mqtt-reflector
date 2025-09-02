@@ -1,0 +1,11 @@
+aiomqtt==2.2.0
+asyncio==3.4.3
+paho-mqtt==2.1.0
+PyYAML==6.0.2
+typing_extensions==4.9.0
+attrs==23.2.0
+boltons==24.0.0
+face==20.1.1
+glom==23.5.0
+Jinja2==3.1.5
+MarkupSafe==2.1.5

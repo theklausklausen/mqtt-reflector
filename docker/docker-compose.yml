@@ -1,0 +1,42 @@
+---
+services:
+
+  reflector:
+    container_name: reflector
+    env_file:
+      - ../workspace.decrypted.env
+    build:
+      context: ../.
+      dockerfile: ./docker/Dockerfile
+      target: development
+      args:
+        - BASE_IMG=${BASE_IMG:-repo.kk.int/infra-images/python-base:latest}
+    user: 1000:1000
+    volumes:
+      - ./src/mqtt-reflector:/app
+    ports:
+      - 9230:9229
+    depends_on:
+      - src-mqtt
+      - dst-mqtt
+  src-mqtt:
+    container_name: src-mqtt
+    image: eclipse-mosquitto
+    # user: 1000:1000
+    ports:
+      - 1883:1883
+    env_file:
+      - ../workspace.decrypted.env
+    volumes:
+      - ./mqtt:/mosquitto/config
+
+  dst-mqtt:
+    container_name: dst-mqtt
+    image: eclipse-mosquitto
+    # user: 1000:1000
+    ports:
+      - 1884:1883
+    env_file:
+      - ../workspace.decrypted.env
+    volumes:
+      - ./mqtt:/mosquitto/config

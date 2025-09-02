@@ -1,0 +1,11 @@
+Makefile
+docker-compose.yml
+.vscode/
+README.md
+*.env
+.sops.yaml
+.gitlab-ci.yml
+node_modules/
+*.log
+mqtt/
+*DEPRIECATED*
