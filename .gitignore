@@ -1,2 +1,3 @@
 workspace.decrypted.env
 mqtt/passwd
+helm/rendered/mqtt-reflector.yaml

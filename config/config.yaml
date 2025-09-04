@@ -1,26 +1,47 @@
+name: mqtt-reflector
+broker:
+  source:
+    host: mqtt
+    port: 1883
+    username: mqtt
+    passwordSecret: mqtt
+    passwordKey: mqtt
+    passwordEnv: MQTT-SRC
+    identifier: mqtt-reflector
+  destination:
+    host: mqtt
+    port: 1883
+    username: mqtt
+    passwordSecret: mqtt
+    passwordKey: mqtt
+    passwordEnv: MQTT-DST
+    identifier: mqtt-reflector
 topics:
-- in: 
-    topic: topic/a
+  - source: topic/e
+    replace:
+      pattern: "/topic"
+      replacement: "/new-topic"
     variables:
       - name: type
         path: car.type
       - name: created_at
         path: car.type.created_at
-  out: 
-    topic: topic/b
     template: | 
       {
         "type": "{{ type }}",
         "created_at": "{{ created_at }}"
       }
-- in: 
-    topic: topic/c
+  - source: topic/f
+    replace:
+      pattern: "/topic"
+      replacement: "/new-topic"
     variables:
       - name: type
-        path: type
-  out: 
-    topic: topic/d
+        path: car.type
+      - name: created_at
+        path: car.type.created_at
     template: | 
       {
-        "type": "{{ type }}"
+        "type": "{{ type }}",
+        "created_at": "{{ created_at }}"
       }

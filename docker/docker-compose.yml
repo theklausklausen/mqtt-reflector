@@ -6,14 +6,18 @@ services:
     env_file:
       - ../workspace.decrypted.env
     build:
-      context: ../.
-      dockerfile: ./docker/Dockerfile
+      context: ./..
+      dockerfile: docker/Dockerfile
       target: development
       args:
         - BASE_IMG=${BASE_IMG:-repo.kk.int/infra-images/python-base:latest}
     user: 1000:1000
     volumes:
-      - ./src/mqtt-reflector:/app
+      - ../src:/app/src
+      - ../config:/config
+    # configs:
+    #   - source: config-yaml
+    #     target: /config/config.yaml
     ports:
       - 9230:9229
     depends_on:
@@ -27,8 +31,14 @@ services:
       - 1883:1883
     env_file:
       - ../workspace.decrypted.env
-    volumes:
-      - ./mqtt:/mosquitto/config
+    # volumes:
+    #   - ./mqtt:/mosquitto/config
+    configs:
+      - source: mosquitto-conf
+        target: /mosquitto/config/mosquitto.conf
+        mode: 0700
+      - source: passwd
+        target: /mosquitto/config/passwd
 
   dst-mqtt:
     container_name: dst-mqtt
@@ -38,5 +48,78 @@ services:
       - 1884:1883
     env_file:
       - ../workspace.decrypted.env
-    volumes:
-      - ./mqtt:/mosquitto/config
+    # volumes:
+    #   - ./mqtt:/mosquitto/config
+    configs:
+      - source: mosquitto-conf
+        target: /mosquitto/config/mosquitto.conf
+        mode: 0700
+      - source: passwd
+        target: /mosquitto/config/passwd
+
+configs:
+  mosquitto-conf:
+    content: |
+      persistence true
+      persistence_location /mosquitto/data/
+      log_type all
+      log_timestamp true
+      allow_anonymous false
+      password_file /mosquitto/config/passwd
+      listener 1883
+      protocol mqtt
+      listener 9001
+      protocol websockets
+  passwd:
+    content: |
+      mqtt:$7$101$jkvevfe/nnac1Bz6$VEuK/wgxMwAU6tGg4HoNuEvzbOzTmBO3o00A7DrnguSz/OQ0T1BTaW+0O3UD2R3tQiQj2mKmTrfyxJtQY6mPpQ==
+    # mqtt:mqtt
+
+  # config-yaml:
+  #   content: |
+  #     broker:
+  #       source:
+  #         broker: mqtt
+  #         port: 1883
+  #         username: mqtt
+  #         passwordSecret: mqtt
+  #         passwordKey: mqtt
+  #         passwordEnv: mqtt
+  #         clientId: mqtt-reflector
+  #       destination:
+  #         broker: mqtt
+  #         port: 1883
+  #         username: mqtt
+  #         passwordSecret: mqtt
+  #         passwordKey: mqtt
+  #         passwordEnv: mqtt
+  #         clientId: mqtt-reflector
+  #     topics:
+  #       - source: topic/e
+  #         replace:
+  #           pattern: "/topic"
+  #           replacement: "/new-topic"
+  #         variables:
+  #           - name: type
+  #             path: car.type
+  #           - name: created_at
+  #             path: car.type.created_at
+  #         template: | 
+  #           {
+  #             "type": "{{ type }}",
+  #             "created_at": "{{ created_at }}"
+  #           }
+  #       - source: topic/f
+  #         replace:
+  #           pattern: "/topic"
+  #           replacement: "/new-topic"
+  #         variables:
+  #           - name: type
+  #             path: car.type
+  #           - name: created_at
+  #             path: car.type.created_at
+  #         template: | 
+  #           {
+  #             "type": "{{ type }}",
+  #             "created_at": "{{ created_at }}"
+  #           }

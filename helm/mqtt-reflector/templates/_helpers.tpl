@@ -24,6 +24,20 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{/*
+Create the name of the mirrored deployment.
+*/}}
+{{- define "mqtt-reflector.mirroreddeployment" -}}
+{{- printf "%s-deployment" .name | trunc 63 | trimSuffix "-" -}}
+{{- end }}
+
+{{/*
+Create the name of the mirrored configmap.
+*/}}
+{{- define "mqtt-reflector.mirroredconfigmap" -}}
+{{- printf "%s-configmap" .name | trunc 63 | trimSuffix "-" -}}
+{{- end }}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "mqtt-reflector.chart" -}}

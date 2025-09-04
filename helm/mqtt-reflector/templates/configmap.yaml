@@ -1,0 +1,16 @@
+{{- $root := . }}
+{{- range .Values.mirrors }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mqtt-reflector.mirroredconfigmap" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "mqtt-reflector.name" $root }}
+    helm.sh/chart: {{ include "mqtt-reflector.chart" $root }}
+    app.kubernetes.io/instance: {{ $root.Release.Name }}
+    app.kubernetes.io/managed-by: {{ $root.Release.Service }}
+data:
+  config.yaml: |
+{{ toYaml . | indent 4 }}
+{{- end }}
