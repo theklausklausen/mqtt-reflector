@@ -61,77 +61,77 @@ stages:
       - '**/*.yml'
       - '**/*.yaml'
 
-# # security
-# secret_scan:
-#   extends: .secret_scan
-# package_scan:
-#   extends: .package_scan
+# security
+secret_scan:
+  extends: .secret_scan
+package_scan:
+  extends: .package_scan
 
-# # lint
-# markdown lint:
-#   extends: .markdown_lint
-#   # <<: *only_on_markdown_change
-# yaml lint:
-#   extends: .yaml_lint
-#   # <<: *only_on_yaml_change
-# prettier lint:
-#   extends: .prettier
-# helm lint:
-#   extends: .helm_lint
-#   variables:
-#     HELM_CHART_DIR: helm/mqtt-reflector/
-#   # <<: *only_on_helm_change
+# lint
+markdown lint:
+  extends: .markdown_lint
+  # <<: *only_on_markdown_change
+yaml lint:
+  extends: .yaml_lint
+  # <<: *only_on_yaml_change
+prettier lint:
+  extends: .prettier
+helm lint:
+  extends: .helm_lint
+  variables:
+    HELM_CHART_DIR: helm/mqtt-reflector/
+  # <<: *only_on_helm_change
 
-# # tests
-# unit_tests:
-#   stage: test
-#   image: python:3.9
-#   before_script:
-#     - pip install pytest
-#   script:
-#     - pytest tests/
-#   allow_failure: true
-# render helm chart:
-#   extends: .render_helm_chart
-#   variables:
-#     HELM_CHART_DIR: helm/mqtt-reflector/
-#   # <<: *only_on_helm_change
+# tests
+unit_tests:
+  stage: test
+  image: python:3.9
+  before_script:
+    - pip install pytest
+  script:
+    - pytest tests/
+  allow_failure: true
+render helm chart:
+  extends: .render_helm_chart
+  variables:
+    HELM_CHART_DIR: helm/mqtt-reflector/
+  # <<: *only_on_helm_change
 
-# # mqtt-reflector
-# build test:
-#   extends: .build_test
-#   variables:
-#     IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
-#     IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
-#     BUILD_TARGET: production
-#     CONTEXT: ${CI_PROJECT_DIR}/
-#     DOCKERFILE: ${CI_PROJECT_DIR}/docker/Dockerfile
-#   # <<: *build_only
+# mqtt-reflector
+build test:
+  extends: .build_test
+  variables:
+    IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
+    IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
+    BUILD_TARGET: production
+    CONTEXT: ${CI_PROJECT_DIR}/
+    DOCKERFILE: ${CI_PROJECT_DIR}/docker/Dockerfile
+  # <<: *build_only
 
-# build:
-#   extends: .image_multi_arch
-#   variables:
-#     IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
-#     IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
-#     BUILD_TARGET: production
-#     CONTEXT: ${CI_PROJECT_DIR}/
-#     DOCKERFILE: ${CI_PROJECT_DIR}/docker/Dockerfile
-#   # <<: *build_only
+build:
+  extends: .image_multi_arch
+  variables:
+    IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
+    IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
+    BUILD_TARGET: production
+    CONTEXT: ${CI_PROJECT_DIR}/
+    DOCKERFILE: ${CI_PROJECT_DIR}/docker/Dockerfile
+  # <<: *build_only
 
-# package image:
-#   extends: .image_tag
-#   variables:
-#     IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
-#   tags:
-#     - amd64
-#   # <<: *build_only
+package image:
+  extends: .image_tag
+  variables:
+    IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
+  tags:
+    - amd64
+  # <<: *build_only
 
-# package helm:
-#   extends: .package_helm_chart
-#   variables:
-#     HELM_CHART_DIR: helm/
-#     IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
-#   # <<: *only_on_helm_change
+package helm:
+  extends: .package_helm_chart
+  variables:
+    HELM_CHART_DIR: helm/
+    IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
+  # <<: *only_on_helm_change
 
-deploy to helm values file:
-  extends: .deploy_container_to_helm_values_file
+# deploy to helm values file:
+#   extends: .deploy_container_to_helm_values_file
