@@ -123,5 +123,5 @@ package:
   tags:
     - amd64
   # <<: *build_only
-# deploy:
-#   extends: .deploy_container_to_helm_values_file
+deploy:
+  extends: .deploy_container_to_helm_values_file
