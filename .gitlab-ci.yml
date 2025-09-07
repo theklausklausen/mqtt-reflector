@@ -135,9 +135,3 @@ stages:
 
 deploy to helm values file:
   extends: .deploy_container_to_helm_values_file
-
-wait:
-  stage: deploy
-  script:
-    - echo "Waiting for manual approval to deploy to production..."
-  when: manual
