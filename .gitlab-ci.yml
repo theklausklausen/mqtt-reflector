@@ -129,7 +129,7 @@ package image:
 package helm:
   extends: .package_helm_chart
   variables:
-    HELM_CHART_DIR: helm/mqtt-reflector/
+    HELM_CHART_DIR: helm/
     IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
   # <<: *only_on_helm_change
 
