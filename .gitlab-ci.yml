@@ -70,17 +70,17 @@ package_scan:
 # lint
 markdown lint:
   extends: .markdown_lint
-  <<: *only_on_markdown_change
+  # <<: *only_on_markdown_change
 yaml lint:
   extends: .yaml_lint
-  <<: *only_on_yaml_change
+  # <<: *only_on_yaml_change
 prettier lint:
   extends: .prettier
 helm lint:
   extends: .helm_lint
   variables:
     HELM_CHART_DIR: helm/mqtt-reflector/
-  <<: *only_on_helm_change
+  # <<: *only_on_helm_change
 
 # tests
 unit_tests:
@@ -95,7 +95,7 @@ render helm chart:
   extends: .render_helm_chart
   variables:
     HELM_CHART_DIR: helm/mqtt-reflector/
-  <<: *only_on_helm_change
+  # <<: *only_on_helm_change
 
 # mqtt-reflector
 build test:
@@ -106,7 +106,7 @@ build test:
     BUILD_TARGET: production
     CONTEXT: ${CI_PROJECT_DIR}/
     DOCKERFILE: ${CI_PROJECT_DIR}/docker/Dockerfile
-  <<: *build_only
+  # <<: *build_only
 build:
   extends: .image_multi_arch
   variables:
@@ -115,11 +115,13 @@ build:
     BUILD_TARGET: production
     CONTEXT: ${CI_PROJECT_DIR}/
     DOCKERFILE: ${CI_PROJECT_DIR}/docker/Dockerfile
-  <<: *build_only
+  # <<: *build_only
 package:
   extends: .image_tag
   variables:
     IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
   tags:
     - amd64
-  <<: *build_only
+  # <<: *build_only
+deploy:
+  extends: .deploy_container_to_helm_values_file
