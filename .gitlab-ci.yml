@@ -107,6 +107,7 @@ build test:
     CONTEXT: ${CI_PROJECT_DIR}/
     DOCKERFILE: ${CI_PROJECT_DIR}/docker/Dockerfile
   # <<: *build_only
+
 build:
   extends: .image_multi_arch
   variables:
@@ -116,12 +117,21 @@ build:
     CONTEXT: ${CI_PROJECT_DIR}/
     DOCKERFILE: ${CI_PROJECT_DIR}/docker/Dockerfile
   # <<: *build_only
-package:
+
+package image:
   extends: .image_tag
   variables:
     IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
   tags:
     - amd64
   # <<: *build_only
+
+package helm:
+  extends: .package_helm_chart
+  variables:
+    HELM_CHART_DIR: helm/mqtt-reflector/
+    IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
+  # <<: *only_on_helm_change
+
 deploy:
   extends: .deploy_container_to_helm_values_file
