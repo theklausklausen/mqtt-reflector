@@ -9,7 +9,6 @@ from glom import glom
 from logger import Logger
 import re
 import random
-# kubernetes api client
 
 
 CONFIG_FILE = '/config/config.yaml'
@@ -167,34 +166,47 @@ class App:
     with open(CONFIG_FILE, 'r') as file:
       config = yaml.safe_load(file)
 
-    if config['broker']['source']['passwordEnv'] is not None:
-      self.logger.info_message(f'Fetching Environment Password for {config["broker"]["source"]["identifier"]} from {config["broker"]["source"]["passwordEnv"]}')
-      config['broker']['source']['password'] = os.getenv(config['broker']['source']['passwordEnv'])
-    elif config['broker']['source']['passwordSecret'] is not None and config['broker']['source']['passwordKey'] is not None:
-      self.logger.info_message("Fetching Kubernetes Password")
-    else:
-      self.logger.error_message(f'{__name__}: parse_broker: No password source defined for source broker')
-      raise ValueError("No password source defined for source broker")
-    if config['broker']['identifier'] is None:
-      config['broker']['identifier'] = f'{config["name"]}-source'
+    config['broker']['source']['password'] = self.get_password(config['broker']['source'])
+    if config['broker']['source']['identifier'] is None:
+      config['broker']['source']['identifier'] = f'{config["name"]}-source'
 
     if config['broker']['destination'] is None:
       config['broker']['destination'] = config['broker']['source']
       config['broker']['destination']['identifier'] = f'{config["name"]}-destination'
     else:
-      if config['broker']['destination']['passwordEnv'] is not None:
-        self.logger.info_message(f'Fetching Environment Password for {config["broker"]["destination"]["identifier"]} from {config["broker"]["destination"]["passwordEnv"]}')
-        config['broker']['destination']['password'] = os.getenv(config['broker']['destination']['passwordEnv'])
-      elif config['broker']['destination']['passwordSecret'] is not None and config['broker']['destination']['passwordKey'] is not None:
-        self.logger.info_message("Fetching Kubernetes Password")
-      else:
-        self.logger.error_message(f'{__name__}: parse_broker: No password source defined for destination broker')
-        raise ValueError("No password source defined for destination broker")
+      config['broker']['destination']['password'] = self.get_password(config['broker']['destination'])
     if config['broker']['destination']['identifier'] is None:
       config['broker']['destination']['identifier'] = f'{config["name"]}-destination'
 
     return config['broker']
 
+  def get_password_from_env(self, env_var: str) -> str:
+    self.logger.info_message(f'Fetching Environment Password from {env_var}')
+    return os.getenv(env_var)
+
+  def get_password_from_k8s_secret(self, secret_name: str, key: str) -> str:
+    self.logger.info_message(f'Fetching Kubernetes Password from secret {secret_name} key {key}')
+    from kubernetes import client, config as k8s_config
+    try:
+      k8s_config.load_incluster_config()
+    except:
+      k8s_config.load_kube_config()
+    v1 = client.CoreV1Api()
+    secret = v1.read_namespaced_secret(secret_name, 'default')
+    if key in secret.data:
+      return secret.data[key].decode('utf-8')
+    else:
+      self.logger.error_message(f'{__name__}: get_password_from_k8s_secret: Key {key} not found in secret {secret_name}')
+      raise ValueError(f'Key {key} not found in secret {secret_name}')
+
+  def get_password(self, broker: dict) -> str:
+    if broker['passwordEnv'] is not None:
+      return self.get_password_from_env(broker['passwordEnv'])
+    elif broker['passwordSecret'] is not None and broker['passwordKey'] is not None:
+      return self.get_password_from_k8s_secret(broker['passwordSecret'], broker['passwordKey'])
+    else:
+      self.logger.error_message(f'{__name__}: get_password: No password source defined for broker {broker["identifier"]}')
+      raise ValueError("No password source defined for broker")
 
 async def run():
     app = App()

@@ -1,7 +1,7 @@
 name: mqtt-reflector
 broker:
   source:
-    host: mqtt
+    host: src-mqtt
     port: 1883
     username: mqtt
     passwordSecret: mqtt
@@ -9,7 +9,7 @@ broker:
     passwordEnv: MQTT-SRC
     identifier: mqtt-reflector
   destination:
-    host: mqtt
+    host: dst-mqtt
     port: 1883
     username: mqtt
     passwordSecret: mqtt
