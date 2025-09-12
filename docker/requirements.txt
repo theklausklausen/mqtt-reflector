@@ -6,7 +6,7 @@ cachetools==5.5.2
 certifi==2025.8.3
 charset-normalizer==3.4.3
 durationpy==0.10
-face==20.1.1
+face==24.0.0
 glom==23.5.0
 google-auth==2.40.3
 idna==3.10
