@@ -82,6 +82,7 @@ class MqttClient:
             password=self.password
             ) as client:
             self.client = client
+            self.logger.info_message(f'{__name__}: listen: Connected to {app.source.host}:{app.source.port}')
             if self.topics is None:
               self.logger.error_message(f'{__name__}: listen: No topics defined')
               return
