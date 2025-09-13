@@ -210,10 +210,12 @@ class App:
       raise ValueError(f'Key {key} not found in secret {secret_name}')
 
   def get_password(self, broker: dict) -> str:
-    if broker['passwordEnv'] is not None and 'passwordEnv' in broker:
-      return self.get_password_from_env(broker['passwordEnv'])
-    elif broker['passwordSecret'] is not None and broker['passwordKey'] is not None and 'passwordSecret' in broker and 'passwordKey' in broker:
-      return self.get_password_from_k8s_secret(broker['passwordSecret'], broker['passwordKey'])
+    if 'passwordEnv' in broker:
+      if broker['passwordEnv'] is not None:
+        return self.get_password_from_env(broker['passwordEnv'])
+    elif 'passwordSecret' in broker and 'passwordKey' in broker:
+      if broker['passwordSecret'] is not None and broker['passwordKey'] is not None:
+        return self.get_password_from_k8s_secret(broker['passwordSecret'], broker['passwordKey'])
     else:
       self.logger.error_message(f'{__name__}: get_password: No password source defined for broker {broker["identifier"]}')
       raise ValueError("No password source defined for broker")
