@@ -72,6 +72,7 @@ class MqttClient:
     return topics
     
   async def listen(self):
+    self.logger.info_message(f'{__name__}: listen: host {self.host} port {self.port} user {self.user} identifier {self.identifier}')
     while self.reconnect_ctr < RECONNECT_MAX:
       try:
         async with aiomqtt.Client(
