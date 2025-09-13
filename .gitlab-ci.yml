@@ -81,6 +81,8 @@ helm lint:
   variables:
     HELM_CHART_DIR: helm/mqtt-reflector/
   # <<: *only_on_helm_change
+  tags:
+    - amd64
 
 # tests
 unit_tests:
