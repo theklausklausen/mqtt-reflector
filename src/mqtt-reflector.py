@@ -103,6 +103,7 @@ class MqttClient:
         await asyncio.sleep(RECONNECT_INTERVAL)
 
   async def publish(self, topic: str, payload: str):
+    self.logger.info_message(f'{__name__}: publish: host {self.host} port {self.port} user {self.user} identifier {self.identifier}')
     while self.reconnect_ctr < RECONNECT_MAX:
       try:
         self.logger.info_message(f'{__name__}: publish: Publishing to {app.destination.host}:{app.destination.port} topic {topic} payload {payload}')
@@ -182,7 +183,7 @@ class App:
     if config['broker']['source']['identifier'] is None:
       config['broker']['source']['identifier'] = f'{config["name"]}-source'
 
-    if config['broker']['destination'] is None:
+    if config['broker']['destination'] is None or 'destination' not in config['broker']:
       config['broker']['destination'] = config['broker']['source']
       config['broker']['destination']['identifier'] = f'{config["name"]}-destination'
     else:
@@ -206,7 +207,7 @@ class App:
     v1 = client.CoreV1Api()
     namespace = self.get_current_namespace()
     secret = v1.read_namespaced_secret(secret_name, namespace)
-    if key in secret.data:      # base64 -d
+    if key in secret.data:
       import base64
       return base64.b64decode(secret.data[key]).decode('utf-8')
     else:
