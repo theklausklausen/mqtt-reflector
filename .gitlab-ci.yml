@@ -101,7 +101,7 @@ render helm chart:
 build test:
   extends: .build_test
   variables:
-    IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
+    IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}
     IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
     BUILD_TARGET: production
     CONTEXT: ${CI_PROJECT_DIR}/
@@ -111,7 +111,7 @@ build test:
 build:
   extends: .image_multi_arch
   variables:
-    IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
+    IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}
     IMAGE_TAG: ${CI_COMMIT_SHORT_SHA}
     BUILD_TARGET: production
     CONTEXT: ${CI_PROJECT_DIR}/
@@ -121,7 +121,7 @@ build:
 package image:
   extends: .image_tag
   variables:
-    IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
+    IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}
   tags:
     - amd64
   # <<: *build_only
