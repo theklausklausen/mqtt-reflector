@@ -204,8 +204,9 @@ class App:
     v1 = client.CoreV1Api()
     namespace = self.get_current_namespace()
     secret = v1.read_namespaced_secret(secret_name, namespace)
-    if key in secret.data:
-      return secret.data[key].decode('utf-8')
+    if key in secret.data:      # base64 -d
+      import base64
+      return base64.b64decode(secret.data[key]).decode('utf-8')
     else:
       self.logger.error_message(f'{__name__}: get_password_from_k8s_secret: Key {key} not found in secret {secret_name}')
       raise ValueError(f'Key {key} not found in secret {secret_name}')
