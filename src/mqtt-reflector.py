@@ -179,6 +179,7 @@ class App:
     with open(CONFIG_FILE, 'r') as file:
       config = yaml.safe_load(file)
 
+    self.validate_broker(config['broker']['source'])
     config['broker']['source']['password'] = self.get_password(config['broker']['source'])
     if config['broker']['source']['identifier'] is None:
       config['broker']['source']['identifier'] = f'{config["name"]}-source'
@@ -188,11 +189,23 @@ class App:
       config['broker']['destination'] = config['broker']['source']
       config['broker']['destination']['identifier'] = f'{config["name"]}-destination'
     else:
+      self.validate_broker(config['broker']['destination'])
       config['broker']['destination']['password'] = self.get_password(config['broker']['destination'])
     if config['broker']['destination']['identifier'] is None:
       config['broker']['destination']['identifier'] = f'{config["name"]}-destination'
 
     return config['broker']
+
+  def validate_broker(self, broker: dict) -> bool:
+    required_keys = ['host', 'port', 'username']
+    for key in required_keys:
+      if key not in broker or broker[key] is None:
+        self.logger.error_message(f'{__name__}: validate_broker: Missing required key {key} in broker configuration')
+        return False
+    if 'passwordEnv' not in broker and ('passwordSecret' not in broker or 'passwordKey' not in broker):
+      self.logger.error_message(f'{__name__}: validate_broker: No password source defined for broker {broker["identifier"]}')
+      return False
+    return True
 
   def get_password_from_env(self, env_var: str, host: str) -> str:
     self.logger.info_message(f'Fetching Environment Password from {env_var} for {host}')
@@ -223,7 +236,7 @@ class App:
         return "default"
 
   def get_password(self, broker: dict) -> str:
-    if 'passwordEnv' in broker:
+    if 'passwordEnv' in broker and broker['passwordEnv'] is not None and broker['passwordEnv'] != '':
       if broker['passwordEnv'] is not None:
         return self.get_password_from_env(broker['passwordEnv'], broker['host'])
     elif 'passwordSecret' in broker and 'passwordKey' in broker:

@@ -92,7 +92,7 @@ mirrors:
         username: mqtt
         passwordSecret: mqtt
         passwordKey: mqtt
-        passwordEnv: MQTT-SRC
+        passwordEnv: null
         identifier: mqtt-reflector
       destination:
         host: mqtt
@@ -100,7 +100,7 @@ mirrors:
         username: mqtt
         passwordSecret: mqtt
         passwordKey: mqtt
-        passwordEnv: MQTT-DST
+        passwordEnv: null
         identifier: mqtt-reflector
     topics:
       - source: topic/e
