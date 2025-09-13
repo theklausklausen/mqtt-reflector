@@ -210,7 +210,7 @@ class App:
       self.logger.error_message(f'{__name__}: get_password_from_k8s_secret: Key {key} not found in secret {secret_name}')
       raise ValueError(f'Key {key} not found in secret {secret_name}')
 
-  def get_current_namespace():
+  def get_current_namespace(self) -> str:
     try:
         with open("/var/run/secrets/kubernetes.io/serviceaccount/namespace", "r") as f:
             return f.read().strip()
