@@ -193,12 +193,12 @@ class App:
 
     return config['broker']
 
-  def get_password_from_env(self, env_var: str) -> str:
-    self.logger.info_message(f'Fetching Environment Password from {env_var}')
+  def get_password_from_env(self, env_var: str, host: str) -> str:
+    self.logger.info_message(f'Fetching Environment Password from {env_var} for {host}')
     return os.getenv(env_var)
 
-  def get_password_from_k8s_secret(self, secret_name: str, key: str) -> str:
-    self.logger.info_message(f'Fetching Kubernetes Password from secret {secret_name} key {key}')
+  def get_password_from_k8s_secret(self, secret_name: str, key: str, host: str) -> str:
+    self.logger.info_message(f'Fetching Kubernetes Password from secret {secret_name} key {key} for {host}')
     from kubernetes import client, config as k8s_config
     try:
       k8s_config.load_incluster_config()
@@ -224,10 +224,10 @@ class App:
   def get_password(self, broker: dict) -> str:
     if 'passwordEnv' in broker:
       if broker['passwordEnv'] is not None:
-        return self.get_password_from_env(broker['passwordEnv'])
+        return self.get_password_from_env(broker['passwordEnv'], broker['host'])
     elif 'passwordSecret' in broker and 'passwordKey' in broker:
       if broker['passwordSecret'] is not None and broker['passwordKey'] is not None:
-        return self.get_password_from_k8s_secret(broker['passwordSecret'], broker['passwordKey'])
+        return self.get_password_from_k8s_secret(broker['passwordSecret'], broker['passwordKey'], broker['host'])
     else:
       self.logger.error_message(f'{__name__}: get_password: No password source defined for broker {broker["identifier"]}')
       raise ValueError("No password source defined for broker")
