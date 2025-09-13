@@ -183,7 +183,8 @@ class App:
     if config['broker']['source']['identifier'] is None:
       config['broker']['source']['identifier'] = f'{config["name"]}-source'
 
-    if config['broker']['destination'] is None or 'destination' not in config['broker']:
+    if 'destination' not in config['broker']:
+      self.logger.info_message('No destination broker defined, using source broker settings')
       config['broker']['destination'] = config['broker']['source']
       config['broker']['destination']['identifier'] = f'{config["name"]}-destination'
     else:
