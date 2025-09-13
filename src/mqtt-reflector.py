@@ -25,20 +25,24 @@ class Variable:
 
 class Topic:
   def __init__(self, topic):
-    self.source = topic['source']
-    # self.destination = topic['source']
-    self.pattern = topic['replace']['pattern'] or None
-    self.replacement = topic['replace']['replacement'] or None
-    # if topic['replace'] is not None:
-    #   self.destination = re.sub(topic['replace']['search'], topic['replace']['replacement'], self.source)
-    self.template = topic['template'] or None
-    self.variables = []
-    for v in topic['variables']:
-        self.variables.append(Variable(v['name'], v['path']))
+    self.logger: Logger = Logger(__class__.__name__)
+    self.source: str = topic['source']
+    self.pattern: str = None
+    self.replacement: str = None
+    if 'replace' in topic and topic['replace'] is not None:
+      self.pattern = topic['replace']['pattern'] if 'pattern' in topic['replace'] else None
+      self.replacement = topic['replace']['replacement'] if 'replacement' in topic['replace'] else None
+    self.template: str = topic['template'] if 'template' in topic else None
+    self.variables: list[Variable] = []
+    if 'variables' in topic and topic['variables'] is not None:
+      for v in topic['variables']:
+          self.variables.append(Variable(v['name'], v['path']))
 
   def get_destination_topic(self, source_topic: str) -> str:
     if self.pattern is not None and self.replacement is not None:
+      self.logger.info_message(f'{__name__}: get_destination_topic: Transforming {source_topic} using pattern {self.pattern} and replacement {self.replacement}')
       return re.sub(self.pattern, self.replacement, source_topic)
+    self.logger.info_message(f'{__name__}: get_destination_topic: No transformation for {source_topic}')
     return self.source
 
 class MqttClient:
@@ -64,6 +68,7 @@ class MqttClient:
       config = yaml.safe_load(file)
       for topic in config['topics']:
         topics.append(Topic(topic))
+        self.logger.info_message(f'{__name__}: parse_topics: Added topic {topic["source"]}')
     return topics
     
   async def listen(self):
@@ -72,7 +77,7 @@ class MqttClient:
         async with aiomqtt.Client(
             hostname=self.host,
             port=self.port,
-            identifier=self.identifier or f'mqtt-reflector-{str(random.randint(10_000_000, 99_999_999))}',
+            identifier=self.identifier or f'mqtt-rtopicseflector-{str(random.randint(10_000_000, 99_999_999))}',
             username=self.user,
             password=self.password
             ) as client:
@@ -83,9 +88,11 @@ class MqttClient:
             for topic in self.topics:
               self.logger.info_message(f'{__name__}: listen: Subscribing to {topic.source}')
               await self.client.subscribe(topic.source)
+              self.logger.info_message(f'{__name__}: listen: Subscribed to {topic.source}')
             self.reconnect_ctr = 0
             async for message in self.client.messages:
               topic = self.get_topic_by_in(str(message.topic))
+              self.logger.info_message(f'{__name__}: listen: Received message on {app.destination.host}:{app.destination.port} topic {message.topic} payload {message.payload}')
               if topic is not None:
                 await self.mirror_message(topic, message)
       except Exception as e:
@@ -96,6 +103,7 @@ class MqttClient:
   async def publish(self, topic: str, payload: str):
     while self.reconnect_ctr < RECONNECT_MAX:
       try:
+        self.logger.info_message(f'{__name__}: publish: Publishing to {app.destination.host}:{app.destination.port} topic {topic} payload {payload}')
         async with aiomqtt.Client(
             hostname=self.host,
             port=self.port,
@@ -105,18 +113,20 @@ class MqttClient:
         ) as client:
           self.client = client
           await self.client.publish(topic, payload)
+        return
       except Exception as e:
         self.logger.error_message(f'{__name__}: publish: {str(e)}')
         self.reconnect_ctr += 1
         await asyncio.sleep(RECONNECT_INTERVAL)
 
   async def mirror_message(self, topic: Topic, message: aiomqtt.Message):
-    self.logger.info_message(f'{__name__}: mirror_message: in {app.source.host}{str(message.topic)} {message.payload}')
+    self.logger.info_message(f'{__name__}: mirror_message: in {str(message.topic)} {message.payload}')
+    self.logger.info_message(f'{__name__}: mirror_message: variables: {topic.variables}')
     vars = self.extract_variables(topic.variables, message.payload) if len(topic.variables) > 0 else {}
     payload = self.render_template(topic.template, vars) if topic.template is not None else message.payload
-    self.logger.info_message(f'{__name__}: mirror_message: out {topic.destination} {payload}')
-    destination_topic = topic.get_destination_topic(message.topic)
-    await self.client.publish(destination_topic, payload)
+    destination_topic = topic.get_destination_topic(message.topic.value)
+    self.logger.info_message(f'{__name__}: mirror_message: out {destination_topic} {payload}')
+    await app.destination.publish(destination_topic, payload)
 
   def get_topic_by_in(self, source: str) -> Topic:
     for topic in self.topics:
@@ -200,17 +210,18 @@ class App:
       raise ValueError(f'Key {key} not found in secret {secret_name}')
 
   def get_password(self, broker: dict) -> str:
-    if broker['passwordEnv'] is not None:
+    if broker['passwordEnv'] is not None and 'passwordEnv' in broker:
       return self.get_password_from_env(broker['passwordEnv'])
-    elif broker['passwordSecret'] is not None and broker['passwordKey'] is not None:
+    elif broker['passwordSecret'] is not None and broker['passwordKey'] is not None and 'passwordSecret' in broker and 'passwordKey' in broker:
       return self.get_password_from_k8s_secret(broker['passwordSecret'], broker['passwordKey'])
     else:
       self.logger.error_message(f'{__name__}: get_password: No password source defined for broker {broker["identifier"]}')
       raise ValueError("No password source defined for broker")
 
 async def run():
-    app = App()
-    await app.source.run()
+  global app
+  app = App()
+  await app.source.run()
 
 if __name__ == '__main__':
   Logger('mqtt-reflector').info_message(f'{__name__}: Starting mqtt-reflector')

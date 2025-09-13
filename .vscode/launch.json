@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "MQTT-Reflector: Attach",
+      "type": "python",
+      "request": "attach",
+      "debugServer": 3001,
+      "host": "localhost",
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/src",
+          "remoteRoot": "/app/src"
+        }
+      ],
+      "logToFile": true
+    }
+  ]
+}

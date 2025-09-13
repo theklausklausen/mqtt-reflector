@@ -12,7 +12,7 @@ RUN pip install --upgrade pip && \
     pip install -r /app/requirements.txt && \
     pip install debugpy
 USER $USER
-CMD [ "python3", "-m", "debugpy", "--listen", "0.0.0.0:9229", "/app/src/mqtt-reflector.py"]
+CMD [ "python3", "-m", "debugpy", "--listen", "0.0.0.0:3001", "/app/src/mqtt-reflector.py"]
 
 FROM ${BASE_IMG} AS production
 ENV PYTHONDONTWRITEBYTECODE=1
