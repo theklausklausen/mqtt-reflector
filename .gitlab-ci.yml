@@ -126,12 +126,16 @@ package image:
     - amd64
   # <<: *build_only
 
+# package
 package helm:
   extends: .package_helm_chart
   variables:
     HELM_CHART_DIR: helm/
-    IMAGE_NAME: ${NEXUS_REPO_HOST}/${CI_PROJECT_NAME}/mqtt-reflector
-  # <<: *only_on_helm_change
+    PACKAGE_NAME: ${CI_PROJECT_NAME}
 
-# deploy to helm values file:
-#   extends: .deploy_container_to_helm_values_file
+# deploy
+deploy helm:
+  extends: .deploy_helm_chart
+  variables:
+    HELM_CHART_DIR: helm/
+    PACKAGE_NAME: ${CI_PROJECT_NAME}
