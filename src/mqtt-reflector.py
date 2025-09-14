@@ -94,7 +94,7 @@ class MqttClient:
             self.reconnect_ctr = 0
             async for message in self.client.messages:
               topic = self.get_topic_by_in(str(message.topic))
-              self.logger.info_message(f'{__name__}: listen: Received message on {app.source.host}:{app.source.port} topic {message.topic} payload {message.payload}')
+              self.logger.info_message(f'{__name__}: listen: Received message on {app.source.host}:{app.source.port} topic {message.topic}')
               if topic is not None:
                 await self.mirror_message(topic, message)
       except Exception as e:
@@ -106,7 +106,7 @@ class MqttClient:
     self.logger.info_message(f'{__name__}: publish: host {self.host} port {self.port} user {self.user} identifier {self.identifier}')
     while self.reconnect_ctr < RECONNECT_MAX:
       try:
-        self.logger.info_message(f'{__name__}: publish: Publishing to {app.destination.host}:{app.destination.port} topic {topic} payload {payload}')
+        self.logger.info_message(f'{__name__}: publish: Publishing to {app.destination.host}:{app.destination.port} topic {topic}')
         async with aiomqtt.Client(
             hostname=self.host,
             port=self.port,
