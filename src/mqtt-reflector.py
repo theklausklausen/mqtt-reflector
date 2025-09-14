@@ -54,7 +54,6 @@ class MqttClient:
     self.password: str = password
     self.identifier: str = identifier
     self.reconnect_ctr: int = 0
-    # self.reconnect_state = None
     self.topics: list[Topic] = self.parse_topics()
     self.client: aiomqtt.Client = None
 
@@ -107,23 +106,23 @@ class MqttClient:
   async def publish(self, topic: str, payload: str):
     self.logger.info_message(f'{__name__}: publish: host {self.host} port {self.port} user {self.user} identifier {self.identifier}')
     while self.reconnect_ctr < RECONNECT_MAX:
-      try:
-        async with aiomqtt.Client(
-            hostname=self.host,
-            port=self.port,
-            identifier=self.identifier,
-            username=self.user,
-            password=self.password
-        ) as client:
-          self.client = client
-          self.logger.info_message(f'{__name__}: publish: Publishing to {app.destination.host}:{app.destination.port} topic {topic}')
-          await self.client.publish(topic, payload)
-          break
-        return
-      except Exception as e:
-        self.logger.error_message(f'{__name__}: publish: {str(e)}')
-        self.reconnect_ctr += 1
-        await asyncio.sleep(RECONNECT_INTERVAL)
+      # try:
+      async with aiomqtt.Client(
+          hostname=self.host,
+          port=self.port,
+          identifier=self.identifier,
+          username=self.user,
+          password=self.password
+      ) as client:
+        self.client = client
+        self.logger.info_message(f'{__name__}: publish: Publishing to {app.destination.host}:{app.destination.port} topic {topic}')
+        await self.client.publish(topic, payload)
+        break
+      return
+      # except Exception as e:
+      #   self.logger.error_message(f'{__name__}: publish: {str(e)}')
+      #   self.reconnect_ctr += 1
+      #   await asyncio.sleep(RECONNECT_INTERVAL)
       self.reconnect_ctr = 0
 
   async def mirror_message(self, topic: Topic, message: aiomqtt.Message):
