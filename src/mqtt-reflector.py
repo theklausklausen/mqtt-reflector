@@ -223,7 +223,11 @@ class App:
     secret = v1.read_namespaced_secret(secret_name, namespace)
     if key in secret.data:
       import base64
-      return base64.b64decode(secret.data[key]).decode('utf-8')
+      passwod = secret.data[key]
+      decoded = base64.b64decode(passwod).decode('utf-8')
+      self.logger.info_message(f'Password {passwod} decoded to {decoded}')
+      # return base64.b64decode(secret.data[key]).decode('utf-8')
+      return decoded
     else:
       self.logger.error_message(f'{__name__}: get_password_from_k8s_secret: Key {key} not found in secret {secret_name}')
       raise ValueError(f'Key {key} not found in secret {secret_name}')
