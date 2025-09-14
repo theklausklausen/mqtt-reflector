@@ -97,6 +97,8 @@ class MqttClient:
               self.logger.info_message(f'{__name__}: listen: Received message on {app.source.host}:{app.source.port} topic {message.topic}')
               if topic is not None:
                 await self.mirror_message(topic, message)
+              else:
+                self.logger.error_message(f'{__name__}: listen: No topic configuration found for {message.topic}')
       # except Exception as e:
       #   self.logger.error_message(f'{__name__}: listen: {str(e)}')
       #   self.reconnect_ctr += 1
