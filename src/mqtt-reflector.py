@@ -47,21 +47,21 @@ class Topic:
 
 class MqttClient:
   def __init__(self, host, port, user, password, identifier):
-    self.logger = Logger(__class__.__name__)
-    self.host = host
-    self.port = port
-    self.user = user
-    self.password = password
-    self.identifier = identifier
-    self.reconnect_ctr = 0
-    self.reconnect_state = None
-    self.topics = self.parse_topics()
-    # self.client = None
-    
+    self.logger: Logger = Logger(__class__.__name__)
+    self.host: str = host
+    self.port: str = port
+    self.user: str = user
+    self.password: str = password
+    self.identifier: str = identifier
+    self.reconnect_ctr: int = 0
+    # self.reconnect_state = None
+    self.topics: list[Topic] = self.parse_topics()
+    self.client: aiomqtt.Client = None
+
   async def run(self):
     task = asyncio.get_event_loop().create_task(self.listen())
     await task
-    
+
   def parse_topics(self) -> list[Topic]:
     topics = []
     with open(CONFIG_FILE, 'r') as file:
@@ -74,7 +74,7 @@ class MqttClient:
   async def listen(self):
     self.logger.info_message(f'{__name__}: listen: host {self.host} port {self.port} user {self.user} identifier {self.identifier}')
     while self.reconnect_ctr < RECONNECT_MAX:
-      # try:
+      try:
         async with aiomqtt.Client(
             hostname=self.host,
             port=self.port,
@@ -99,16 +99,15 @@ class MqttClient:
                 await self.mirror_message(topic, message)
               else:
                 self.logger.error_message(f'{__name__}: listen: No topic configuration found for {message.topic}')
-      # except Exception as e:
-      #   self.logger.error_message(f'{__name__}: listen: {str(e)}')
-      #   self.reconnect_ctr += 1
-      #   await asyncio.sleep(RECONNECT_INTERVAL)
+      except Exception as e:
+        self.logger.error_message(f'{__name__}: listen: {str(e)}')
+        self.reconnect_ctr += 1
+        await asyncio.sleep(RECONNECT_INTERVAL)
 
   async def publish(self, topic: str, payload: str):
     self.logger.info_message(f'{__name__}: publish: host {self.host} port {self.port} user {self.user} identifier {self.identifier}')
     while self.reconnect_ctr < RECONNECT_MAX:
       try:
-        self.logger.info_message(f'{__name__}: publish: Publishing to {app.destination.host}:{app.destination.port} topic {topic}')
         async with aiomqtt.Client(
             hostname=self.host,
             port=self.port,
@@ -117,12 +116,15 @@ class MqttClient:
             password=self.password
         ) as client:
           self.client = client
+          self.logger.info_message(f'{__name__}: publish: Publishing to {app.destination.host}:{app.destination.port} topic {topic}')
           await self.client.publish(topic, payload)
+          break
         return
       except Exception as e:
         self.logger.error_message(f'{__name__}: publish: {str(e)}')
         self.reconnect_ctr += 1
         await asyncio.sleep(RECONNECT_INTERVAL)
+      self.reconnect_ctr = 0
 
   async def mirror_message(self, topic: Topic, message: aiomqtt.Message):
     self.logger.info_message(f'{__name__}: mirror_message: in {str(message.topic)} {message.payload}')
