@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  mqtt-reflector:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-09-14T15:30:48.488592887Z"
+    description: A Helm chart for Kubernetes
+    digest: d390d5fba8371b37a2f29cc32d27cfa31d224354ef844814aa19221436fbf1b7
+    name: mqtt-reflector
+    type: application
+    urls:
+    - https://github.com/theklausklausen/mqtt-reflector/releases/download/mqtt-reflector-0.1.0/mqtt-reflector-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-09-14T15:30:48.488597515Z"
