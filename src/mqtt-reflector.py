@@ -105,7 +105,6 @@ class MqttClient:
 
   async def publish(self, topic: str, payload: str):
     self.logger.info_message(f'{__name__}: publish: host {self.host} port {self.port} user {self.user} identifier {self.identifier}')
-    self.logger.info_message(f'{__name__}: ### {self.user} {self.password} ###')
     while self.reconnect_ctr < RECONNECT_MAX:
       try:
         async with aiomqtt.Client(
