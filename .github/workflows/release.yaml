@@ -1,0 +1,38 @@
+name: Release Helm Chart
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'helm/mqtt-reflector/'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4.2.0
+        with:
+          version: v3.15.3
+
+      - name: Package chart
+        run: |
+          mkdir -p packaged
+          helm package myapp -d packaged
+
+      - name: Update Helm repo index
+        run: |
+          mkdir -p public
+          cp -r packaged/* public/
+          helm repo index public --url https://theklausklausen.github.io/mqtt-reflector
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
