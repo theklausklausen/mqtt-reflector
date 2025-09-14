@@ -94,7 +94,7 @@ class MqttClient:
             self.reconnect_ctr = 0
             async for message in self.client.messages:
               topic = self.get_topic_by_in(str(message.topic))
-              self.logger.info_message(f'{__name__}: listen: Received message on {app.destination.host}:{app.destination.port} topic {message.topic} payload {message.payload}')
+              self.logger.info_message(f'{__name__}: listen: Received message on {app.source.host}:{app.source.port} topic {message.topic} payload {message.payload}')
               if topic is not None:
                 await self.mirror_message(topic, message)
       except Exception as e:
@@ -223,11 +223,7 @@ class App:
     secret = v1.read_namespaced_secret(secret_name, namespace)
     if key in secret.data:
       import base64
-      passwod = secret.data[key]
-      decoded = base64.b64decode(passwod).decode('utf-8')
-      self.logger.info_message(f'Password {passwod} decoded to {decoded}')
-      # return base64.b64decode(secret.data[key]).decode('utf-8')
-      return decoded
+      return base64.b64decode(secret.data[key]).decode('utf-8')
     else:
       self.logger.error_message(f'{__name__}: get_password_from_k8s_secret: Key {key} not found in secret {secret_name}')
       raise ValueError(f'Key {key} not found in secret {secret_name}')
