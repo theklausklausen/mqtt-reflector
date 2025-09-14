@@ -43,7 +43,7 @@ class Topic:
       self.logger.info_message(f'{__name__}: get_destination_topic: Transforming {source_topic} using pattern {self.pattern} and replacement {self.replacement}')
       return re.sub(self.pattern, self.replacement, source_topic)
     self.logger.info_message(f'{__name__}: get_destination_topic: No transformation for {source_topic}')
-    return self.source
+    return source_topic
 
 class MqttClient:
   def __init__(self, host, port, user, password, identifier):
@@ -130,7 +130,7 @@ class MqttClient:
     vars = self.extract_variables(topic.variables, message.payload) if len(topic.variables) > 0 else {}
     payload = self.render_template(topic.template, vars) if topic.template is not None else message.payload
     destination_topic = topic.get_destination_topic(message.topic.value)
-    self.logger.info_message(f'{__name__}: mirror_message: out {destination_topic} {payload}')
+    self.logger.info_message(f'{__name__}: mirror_message: out {destination_topic}')
     await app.destination.publish(destination_topic, payload)
 
   def get_topic_by_in(self, source: str) -> Topic:
