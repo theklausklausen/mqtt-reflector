@@ -17,9 +17,9 @@ broker:
     passwordEnv: MQTT-DST
     identifier: mqtt-reflector
 topics:
-  - source: /topic/e
+  - source: /topic/z
     replace:
-      pattern: "\/topic"
+      pattern: "/topic/"
       replacement: "/new-topic"
     variables:
       - name: type
@@ -31,7 +31,7 @@ topics:
         "type": "{{ type }}",
         "created_at": "{{ created_at }}"
       }
-  - source: /topic/f
+  - source: /topic/#
     replace:
-      pattern: "\/topic"
+      pattern: "/topic"
       replacement: "/new-topic"

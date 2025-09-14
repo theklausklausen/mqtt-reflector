@@ -135,7 +135,11 @@ class MqttClient:
 
   def get_topic_by_in(self, source: str) -> Topic:
     for topic in self.topics:
-      if topic.source == source:
+      self.logger.debug_message(f'{__name__}: get_topic_by_in: Checking {topic.source} against {source}')
+      pattern = topic.source.replace('+', '[^/]+').replace('#', '.+')
+      self.logger.debug_message(f'{__name__}: get_topic_by_in: Converted pattern: {pattern}')
+      if re.fullmatch(pattern, source):
+        self.logger.info_message(f'{__name__}: get_topic_by_in: Matched {topic.source} to {source}')
         return topic
     return None
     
