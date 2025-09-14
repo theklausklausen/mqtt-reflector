@@ -36,4 +36,4 @@ jobs:
           platforms: linux/amd64,linux/arm64
           file: ./docker/Dockerfile
           build-args: |
-            BASE_IMGE=python:3.12-alpine
+            BASE_IMG=python:3.12-alpine
