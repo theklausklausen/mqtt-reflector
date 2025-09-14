@@ -73,6 +73,7 @@ helm install mqtt-reflector ./helm/mqtt-reflector
 
 ### Usage
 
+- Install Helm chart `helm repo add mqtt-reflector https://theklausklausen.github.io/mqtt-reflector/`
 - The service subscribes to configured source topics, transforms topics and payloads as specified, and republishes to destination topics.
 - Topic and payload transformation is defined in the config file using regex and Jinja2 templates.
 
