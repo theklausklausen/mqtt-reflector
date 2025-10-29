@@ -1,5 +1,12 @@
 # MQTT Reflector
 
+> [!WARNING]  
+> I wasn’t aware of the [Mosquitto MQTT bridge capabilities](http://www.steves-internet-guide.com/mosquitto-bridge-configuration/), which makes parts of this approach somewhat obsolete.  
+> However, this method can still be useful in cases where:
+> 1. One or both MQTT servers cannot connect outside their network.  
+> 2. Topic or payload transformation is required.
+
+
 MQTT Reflector is a Python-based service for mirroring and transforming MQTT messages between brokers. It is designed for flexible deployment in Kubernetes via Helm and supports dynamic topic mapping and payload templating.
 
 ## Features
@@ -13,7 +20,20 @@ MQTT Reflector is a Python-based service for mirroring and transforming MQTT mes
 
 ## Project Structure
 
-. ├── config/ # Configuration files (YAML) ├── docker/ # Docker and Compose files ├── helm/ # Helm chart for Kubernetes deployment ├── src/ # Python source code │ ├── mqtt-reflector.py # Main application logic │ ├── logger.py # Logging utility │ └── tests/ # Unit tests ├── workspace.env # Encrypted environment variables ├── Makefile # Common development commands └── README.md # This file
+.
+├── config/ # Configuration files (YAML) 
+├── docker/ # Docker and Compose files 
+├── helm/ # Helm chart for Kubernetes deployment 
+├── src/ # Python source code 
+  │ 
+  ├── mqtt-reflector.py # Main application logic 
+  │ 
+  ├── logger.py # Logging utility 
+│ 
+└── tests/ # Unit tests 
+├── workspace.env # Encrypted environment variables 
+├── Makefile # Common development commands 
+└── README.md # This file
 
 ## Getting Started
 
