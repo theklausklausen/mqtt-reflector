@@ -20,20 +20,19 @@ MQTT Reflector is a Python-based service for mirroring and transforming MQTT mes
 
 ## Project Structure
 
+```bash
 .
 ├── config/ # Configuration files (YAML) 
 ├── docker/ # Docker and Compose files 
 ├── helm/ # Helm chart for Kubernetes deployment 
 ├── src/ # Python source code 
-  │ 
-  ├── mqtt-reflector.py # Main application logic 
-  │ 
-  ├── logger.py # Logging utility 
-│ 
-└── tests/ # Unit tests 
+│  ├── mqtt-reflector.py # Main application logic 
+│  ├── logger.py # Logging utility  
+│  └── tests/ # Unit tests 
 ├── workspace.env # Encrypted environment variables 
 ├── Makefile # Common development commands 
 └── README.md # This file
+```
 
 ## Getting Started
 
