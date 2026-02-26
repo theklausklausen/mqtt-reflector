@@ -18,17 +18,20 @@ include:
   - project: 'klausklausen/templates'
     ref: main
     file: 'lint.yml'
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.latest.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
 
 variables:
   TAG: $CI_COMMIT_BRANCH
 
 stages:
-  - security
   - lint
   - test
   - build
   - package
   - deploy
+  - security
 
 .build_file_changes: &build_file_changes
   changes:
@@ -62,10 +65,17 @@ stages:
       - '**/*.yaml'
 
 # security
-secret_scan:
-  extends: .secret_scan
+secret_detection:
+  stage: security
+gitlab-advanced-sast:
+  stage: security
+dependency-scanning:
+  stage: security
 package_scan:
   extends: .package_scan
+container_scan:
+  extends: .container_scan
+  allow_failure: true
 
 # lint
 markdown lint:
