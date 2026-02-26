@@ -89,7 +89,7 @@ prettier lint:
 helm lint:
   extends: .helm_lint
   variables:
-    HELM_CHART_DIR: helm/
+    HELM_CHART_DIR: charts/
     PACKAGE_NAME: ${CI_PROJECT_NAME}
   # <<: *only_on_helm_change
   tags:
@@ -107,7 +107,7 @@ unit_tests:
 render helm chart:
   extends: .render_helm_chart
   variables:
-    HELM_CHART_DIR: helm/
+    HELM_CHART_DIR: charts/
     PACKAGE_NAME: ${CI_PROJECT_NAME}
   # <<: *only_on_helm_change
 
