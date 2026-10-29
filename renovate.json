@@ -3,5 +3,11 @@
   "extends": [
     "config:recommended",
     ":dependencyDashboard"
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    }
   ]
 }
